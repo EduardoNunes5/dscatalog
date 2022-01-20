@@ -27,7 +27,7 @@ public class ProductService {
     private ProductRepository productRepository;
 
     @Autowired
-    private CategoryRepository categoryRepository;
+    private CategoryService categoryService;
 
     @Transactional(readOnly = true)
     public Page<ProductDTO> findAllPaged(PageRequest pageRequest){
@@ -83,9 +83,8 @@ public class ProductService {
         entity.setImgUrl(dto.getImgUrl());
         entity.getCategories().clear();
         dto.getCategories().forEach(catDto -> {
-            Category category = categoryRepository.getOne(catDto.getId());
+            Category category = categoryService.getOne(catDto.getId());
             entity.addCategory(category);
         });
     }
-
 }

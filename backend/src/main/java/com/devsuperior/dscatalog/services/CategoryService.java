@@ -67,4 +67,8 @@ public class CategoryService {
             throw new DatabaseException("Integrity violation.");
         }
     }
+
+    public Category getOne(Long id){
+        return this.categoryRepository.getOne(id);
+    }
 }
