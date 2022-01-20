@@ -44,6 +44,10 @@ public class Product implements Serializable {
         this.date = date;
     }
 
+    public void addCategory(Category category){
+        this.categories.add(category);
+    }
+
     public Long getId() {
         return id;
     }
