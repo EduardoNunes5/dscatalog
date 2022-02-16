@@ -9,11 +9,16 @@ import com.devsuperior.dscatalog.repositories.RoleRepository;
 import com.devsuperior.dscatalog.repositories.UserRepository;
 import com.devsuperior.dscatalog.services.exception.DatabaseException;
 import com.devsuperior.dscatalog.services.exception.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +27,9 @@ import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
+    private static Logger logger = LoggerFactory.getLogger(UserService.class);
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -56,7 +62,7 @@ public class UserService {
     @Transactional
     public UserDTO update(Long id, UserUpdateDTO dto) {
         try {
-            User entity = userRepository.getById(id);
+            User entity = userRepository.getOne(id);
             copyDtoToEntity(dto, entity);
             entity = userRepository.save(entity);
             return new UserDTO(entity);
@@ -85,12 +91,21 @@ public class UserService {
         entity.getRoles().clear();
         entity = userRepository.save(entity);
         for(RoleDTO roleDTO : dto.getRoles()){
-            Role role = roleRepository.getById(roleDTO.getId());
+            Role role = roleRepository.getOne(roleDTO.getId());
             entity.getRoles().add(role);
         }
     }
 
     public User getOne(Long id){
-        return this.userRepository.getById(id);
+        return this.userRepository.getOne(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> {
+                    logger.info("User not found: " + username);
+                    return new UsernameNotFoundException("Email not found");
+                });
     }
 }

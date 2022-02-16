@@ -46,7 +46,7 @@ public class CategoryService {
     @Transactional
     public CategoryDTO update(Long id, CategoryDTO dto) {
         try {
-            Category entity = categoryRepository.getById(id);
+            Category entity = categoryRepository.getOne(id);
             entity.setName(dto.getName());
             entity = categoryRepository.save(entity);
             return new CategoryDTO(entity);
@@ -69,6 +69,6 @@ public class CategoryService {
     }
 
     public Category getOne(Long id){
-        return this.categoryRepository.getById(id);
+        return this.categoryRepository.getOne(id);
     }
 }
